@@ -13,11 +13,12 @@ export default {
         return {
             cardsInfo: [],
             currentPage: 1,
-            name: "",
+            name: "asdasdasd",
             status: '',
             loading: false,
             allPages: 0,
             pagesCount: [],
+            errorResponse: false,
         }
     },
 
@@ -26,18 +27,24 @@ export default {
             this.pagesCount = []
             let result = await api.getAllCharacters()
             return this.allPages = result.info.pages,
-                this.cardsInfo = result.results, this.getPagination()
+                this.cardsInfo = result.results, this.updatePagination()
 
         },
         async getCharacterByFilter(page, name, status,) {
             this.loading = true;
+            this.errorResponse = false;
             this.pagesCount = []
             let result = await api.getCharacterByFilter(page, name, status)
-            console.log(result)
-            this.info = result.info;
-            this.cardsInfo = result.results;
-            this.allPages = result.info.pages;
-            this.getPagination();
+            if (result != "error") {
+                this.info = result.info;
+                this.cardsInfo = result.results;
+                this.allPages = result.info.pages;
+                this.updatePagination();
+            }
+            else {
+                this.errorResponse = true;
+            }
+
             return this.loading = false;
         },
         nextPage() {
@@ -54,7 +61,7 @@ export default {
                 this.getCharacterByFilter(this.currentPage, this.name, this.status)
             }
         },
-        getPagination() {
+        updatePagination() {
             let result = []
             let pagesArray = [...Array(this.allPages)].map((_, i) => (i += 1));
             let leftThree = [1, 2, 3, '...', pagesArray.length];
@@ -133,11 +140,15 @@ export default {
         </div>
         <div class="min-w-full flex flex-wrap " style="height: calc(100vh - 200px);">
             <div class=" flex flex-wrap w-full bg-black justify-center h-full  pb-5 overflow-auto" id="scrollbar1">
-                <div class="ms-5 py-5 max-h-56 my-5" v-for="item in cardsInfo" :key="item.id" v-if="!loading">
+                <div class="ms-5 py-5 max-h-56 my-5" v-for="item in cardsInfo" :key="item.id"
+                    v-if="!loading && !errorResponse">
                     <characterCard :characterData="item">
                     </characterCard>
                 </div>
-                <div v-else class="w-full flex items-center justify-center">
+                <div v-else-if="!loading && errorResponse" class="w-full flex items-center justify-center">
+                    <div class=" text-5xl text-white ont-apple-system font-weight font-bold">Ничего не найдено</div>
+                </div>
+                <div v-if="loading" class="w-full flex items-center justify-center">
                     <div class="mainCss">
                         <div class="dotsCss">
                             <div class="dot"></div>

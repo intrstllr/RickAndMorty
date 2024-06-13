@@ -3,7 +3,9 @@ const url = "https://rickandmortyapi.com/api/character";
 
 export const api = {
     getAllCharacters: async () => {
-        const response = await axios.get(url);
+        const response = await axios.get(url).catch(function (error) {
+            return "error";
+        });
         return response.data;
     },
 
@@ -13,7 +15,14 @@ export const api = {
     },
 
     getCharacterByFilter: async (page: string, name: string, status: string) => {
-        const response = await axios.get(url + "/?page=" + page + "&name=" + name + "&status=" + status);
+        const response = await axios
+            .get(url + "/?page=" + page + "&name=" + name + "&status=" + status)
+            .catch(function (error) {
+                return {
+                    status: "404",
+                    data: "error",
+                };
+            });
 
         return response.data;
     },
